@@ -43,7 +43,7 @@ import com.google.android.gcm.GCMRegistrar;
 public class MainActivity extends Activity {
   
   int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
-  private static String serverUrl = "http://192.168.0.106:5000/";
+  private static String serverUrl = "http://107.170.49.215:5000/";
   
   static final String SENDER_ID="611653623637";
   EditText usernameEditText;
@@ -128,7 +128,7 @@ public class MainActivity extends Activity {
       HttpPost request = new HttpPost(serverUrl+"registrationId");
       request.setEntity(new ByteArrayEntity(json.toString().getBytes("UTF8")));
       request.setHeader("Content-type", "application/json");
-      Log.i("MainActivity", request.toString());
+      Log.i("MainActivity", json.toString());
       
       HttpResponse response = client.execute(request);
       return EntityUtils.toString(response.getEntity());
