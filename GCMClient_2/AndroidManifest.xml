@@ -46,7 +46,7 @@
 			</intent-filter>
 		</receiver>
 
-		<service android:name=".GCMRegistrarIntentService"/>
+		<service android:name=".GCMIntentService"/>
 	</application>
 
 </manifest>

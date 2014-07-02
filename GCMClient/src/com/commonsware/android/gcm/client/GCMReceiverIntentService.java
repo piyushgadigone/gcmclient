@@ -40,13 +40,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-public class GCMIntentService extends IntentService {
-  private static String TAG = GCMIntentService.class.getSimpleName();
+public class GCMReceiverIntentService extends IntentService {
+  private static String TAG = GCMReceiverIntentService.class.getSimpleName();
   public static final int NOTIFICATION_ID = 1;
   private NotificationManager mNotificationManager;
   NotificationCompat.Builder builder;
 
-  public GCMIntentService() {
+  public GCMReceiverIntentService() {
     super("GcmIntentService");
   }
 
