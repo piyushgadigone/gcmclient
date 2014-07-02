@@ -14,14 +14,26 @@
 
 package com.commonsware.android.gcm.client;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService {
+  private static String TAG = GCMBaseIntentService.class.getSimpleName();
+  public static final int NOTIFICATION_ID = 1;
+  private NotificationManager mNotificationManager;
+  NotificationCompat.Builder builder;
+  
   public GCMIntentService() {
     super(MainActivity.SENDER_ID);
   }
@@ -46,6 +58,8 @@ public class GCMIntentService extends GCMBaseIntentService {
             String.format("onMessage: %s=%s", key,
                           extras.getString(key)));
     }
+    
+    sendNotification(extras);
   }
 
   @Override
@@ -58,5 +72,42 @@ public class GCMIntentService extends GCMBaseIntentService {
     Log.d(getClass().getSimpleName(), "onRecoverableError: " + errorMsg);
     
     return(true);
+  }
+  
+  private void sendNotification(Bundle extras) {
+
+    String token = extras.getString("token");
+    String username = extras.getString("username");
+
+    if (token.isEmpty()) {
+      Log.e(TAG, "Empty token received");
+    }
+    if (username.isEmpty()) {
+      Log.e(TAG, "Empty username received");
+    }
+
+    mNotificationManager =
+        (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+    PendingIntent contentIntent =
+        PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+
+    NotificationCompat.Builder mBuilder =
+        new NotificationCompat.Builder(this).setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle("EasyAuth Notification")
+            .setStyle(new NotificationCompat.BigTextStyle().bigText("EasyAuth Login Performed"))
+            .setContentText("EasyAuth Login Performed by " + username);
+
+    mBuilder.setContentIntent(contentIntent);
+    mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+
+    JSONObject json = new JSONObject();
+    try {
+      json.put("token", token);
+      json.put("username", username);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    new AsyncHttpTask(this.getApplicationContext()).execute("ip", json.toString());
   }
 }

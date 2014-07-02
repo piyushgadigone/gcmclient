@@ -1,8 +1,0 @@
-<resources>
-
-	<string name="app_name">GCMClientDemo</string>
-	
-	<string name="username">Username</string>
-	<string name="register">Register me</string>
-
-</resources>

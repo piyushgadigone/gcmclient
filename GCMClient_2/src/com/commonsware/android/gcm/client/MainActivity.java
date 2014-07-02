@@ -30,7 +30,7 @@ import android.widget.Toast;
 import com.google.android.gcm.GCMRegistrar;
 
 public class MainActivity extends Activity {
-  static final String SENDER_ID = "611653623637";
+  static final String SENDER_ID = "490936602980";
   EditText usernameEditText;
 
   @Override
