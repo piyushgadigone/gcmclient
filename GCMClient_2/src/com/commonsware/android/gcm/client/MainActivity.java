@@ -14,38 +14,60 @@
 
 package com.commonsware.android.gcm.client;
 
+import java.io.IOException;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
+
 import com.google.android.gcm.GCMRegistrar;
 
 public class MainActivity extends Activity {
-  static final String SENDER_ID="611653623637"; // change me!
+  static final String SENDER_ID = "611653623637";
+  EditText usernameEditText;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-
-    GCMRegistrar.checkDevice(this);
     
+    GCMRegistrar.checkDevice(this);
+
     if (BuildConfig.DEBUG) {
       GCMRegistrar.checkManifest(this);
     }
-  }
 
-  public void onClick(View v) {
-    final String regId=GCMRegistrar.getRegistrationId(this);
+    final String regId = GCMRegistrar.getRegistrationId(this);
 
     if (regId.length() == 0) {
       GCMRegistrar.register(this, SENDER_ID);
-    }
-    else {
-      Log.d(getClass().getSimpleName(), "Existing registration: "
-          + regId);
+    } else {
+      Log.d(getClass().getSimpleName(), "Existing registration: " + regId);
       Toast.makeText(this, regId, Toast.LENGTH_LONG).show();
     }
+
+    usernameEditText = (EditText) findViewById(R.id.usernameTextView);
+  }
+
+  public void onClick(View v) throws ClientProtocolException, IOException {
+    final String regId = GCMRegistrar.getRegistrationId(this);
+    if (regId.length() == 0) {
+      Toast.makeText(this, "Unable to register device", Toast.LENGTH_SHORT).show();
+    }
+    JSONObject json = new JSONObject();
+    try {
+      json.put("username", usernameEditText.getText().toString());
+      json.put("registrationId", regId);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    new AsyncHttpTask(this.getApplicationContext()).execute("registrationId", json.toString());
   }
 }
