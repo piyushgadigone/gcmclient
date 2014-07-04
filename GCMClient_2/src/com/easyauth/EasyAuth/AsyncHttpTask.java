@@ -1,4 +1,4 @@
-package com.commonsware.android.gcm.client;
+package com.easyauth.EasyAuth;
 
 import java.io.IOException;
 

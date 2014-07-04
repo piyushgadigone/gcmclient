@@ -2,7 +2,8 @@
 
 	<string name="app_name">GCMClientDemo</string>
 
-		<string name="username">Username</string>
+	<string name="username">Username</string>
 	<string name="register">Register me</string>
+	<string name="register_new">Register new device</string>
 
 </resources>

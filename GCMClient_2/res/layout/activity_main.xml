@@ -10,13 +10,14 @@
         android:hint="@string/username" />
 
     <Button
+        android:id="@+id/registerButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onClick"
+        android:onClick="onRegisterClick"
         android:text="@string/register" />
     
     <TextView 
-        android:id="@+id/messageTextView"
+        android:id="@+id/totpTokenTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""/>
