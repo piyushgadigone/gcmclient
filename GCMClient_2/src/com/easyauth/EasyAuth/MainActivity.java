@@ -40,7 +40,7 @@ import com.google.android.gcm.GCMRegistrar;
 public class MainActivity extends Activity {
   static final String SENDER_ID = "490936602980";
   EditText usernameEditText;
-  TextView totpTokenTextView;
+  TextView totpTokenTextView, totpTokenTimerView;
   Button registerButton;
 
   @Override
@@ -65,6 +65,7 @@ public class MainActivity extends Activity {
 
     usernameEditText = (EditText) findViewById(R.id.usernameTextView);
     totpTokenTextView = (TextView) findViewById(R.id.totpTokenTextView);
+    totpTokenTimerView = (TextView) findViewById(R.id.totpTokenTimerView);
     registerButton = (Button) findViewById(R.id.registerButton);
     
     SharedPreferences prefs =
@@ -78,6 +79,7 @@ public class MainActivity extends Activity {
       usernameEditText.setVisibility(View.GONE);
       registerButton.setVisibility(View.GONE);
       totpTokenTextView.setVisibility(View.VISIBLE);
+      totpTokenTimerView.setVisibility(View.VISIBLE);
       
       Thread t = new Thread() {
 
@@ -91,6 +93,9 @@ public class MainActivity extends Activity {
                 public void run() {
                   String totpToken = getTotpToken(secret);
                   totpTokenTextView.setText(totpToken);
+                  
+                  long timeRemaining = getTotpTimeRemaining();
+                  totpTokenTimerView.setText(String.valueOf(timeRemaining));
                 }
               });
             }
@@ -104,6 +109,7 @@ public class MainActivity extends Activity {
       usernameEditText.setVisibility(View.VISIBLE);
       registerButton.setVisibility(View.VISIBLE);
       totpTokenTextView.setVisibility(View.GONE);
+      totpTokenTimerView.setVisibility(View.GONE);
     }
   }
   
@@ -120,6 +126,15 @@ public class MainActivity extends Activity {
       e.printStackTrace();
     }
     return totpToken;
+  }
+  
+  // Returns time remaining in seconds
+  private long getTotpTimeRemaining() {
+    TotpClock totpClock = new TotpClock(this.getApplicationContext());
+    OtpProvider otpProvider = new OtpProvider(null, totpClock);
+    TotpCounter totpCounter = otpProvider.getTotpCounter();
+    long otp_state = totpCounter.getValueAtTime(Utilities.millisToSeconds(totpClock.currentTimeMillis()));
+    return totpCounter.getTimeStep() - Utilities.millisToSeconds(System.currentTimeMillis()) % totpCounter.getTimeStep();
   }
 
   public void onRegisterClick(View v) throws ClientProtocolException, IOException {
