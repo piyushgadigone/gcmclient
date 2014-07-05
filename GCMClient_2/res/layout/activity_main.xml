@@ -1,31 +1,56 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/usernameTextView"
+    <LinearLayout
+        android:id="@+id/registerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/username" />
+        android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/registerButton"
+        <EditText
+            android:id="@+id/usernameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/username"
+            android:textColor="#FFFFFF"
+            android:padding="10dp"  />
+
+        <Button
+            android:id="@+id/registerButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onRegisterClick"
+            android:text="@string/register"
+            android:textColor="#FFFFFF"
+            android:padding="10dp"  />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/tokenView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="onRegisterClick"
-        android:text="@string/register" />
-    
-    <TextView 
-        android:id="@+id/totpTokenTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""/>
-    
-    <TextView 
-        android:id="@+id/totpTokenTimerView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""/>
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/totpTokenTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="43D31"
+            android:textSize="40sp"
+            android:textColor="#FFFFFF"
+            android:padding="10dp"  />
+
+        <TextView
+            android:id="@+id/totpTokenTimerView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="30"
+            android:textSize="40sp"
+            android:textColor="#FFFFFF"
+            android:layout_alignParentRight="true"
+            android:padding="10dp" />
+    </RelativeLayout>
 
 </LinearLayout>

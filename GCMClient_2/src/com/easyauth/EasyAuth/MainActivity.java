@@ -22,14 +22,17 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.easyauth.EasyAuth.BuildConfig;
-import com.easyauth.EasyAuth.R;
 import com.easyauth.EasyAuth.googleAuthenticator.OtpProvider;
 import com.easyauth.EasyAuth.googleAuthenticator.OtpSourceException;
 import com.easyauth.EasyAuth.googleAuthenticator.TotpClock;
@@ -42,6 +45,8 @@ public class MainActivity extends Activity {
   EditText usernameEditText;
   TextView totpTokenTextView, totpTokenTimerView;
   Button registerButton;
+  LinearLayout registerView;
+  RelativeLayout tokenView;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -60,14 +65,17 @@ public class MainActivity extends Activity {
       GCMRegistrar.register(this, SENDER_ID);
     } else {
       Log.d(getClass().getSimpleName(), "Existing registration: " + regId);
-      Toast.makeText(this, regId, Toast.LENGTH_LONG).show();
+      if (BuildConfig.DEBUG)
+        Toast.makeText(this, regId, Toast.LENGTH_LONG).show();
     }
 
+    registerView = (LinearLayout) findViewById(R.id.registerView);
+    tokenView = (RelativeLayout) findViewById(R.id.tokenView);
     usernameEditText = (EditText) findViewById(R.id.usernameTextView);
     totpTokenTextView = (TextView) findViewById(R.id.totpTokenTextView);
     totpTokenTimerView = (TextView) findViewById(R.id.totpTokenTimerView);
     registerButton = (Button) findViewById(R.id.registerButton);
-    
+
     SharedPreferences prefs =
         getSharedPreferences(Constants.EASYAUTH_PREFERENCES_KEY, Context.MODE_PRIVATE);
     String username = prefs.getString(Constants.EASYAUTH_USERNAME_KEY, "");
@@ -76,28 +84,26 @@ public class MainActivity extends Activity {
     // Show the token and the register new button if a username is already registered in the device.
     // Else show the username and register button.
     if (!username.isEmpty() && !secret.isEmpty()) {
-      usernameEditText.setVisibility(View.GONE);
-      registerButton.setVisibility(View.GONE);
-      totpTokenTextView.setVisibility(View.VISIBLE);
-      totpTokenTimerView.setVisibility(View.VISIBLE);
-      
+      registerView.setVisibility(View.GONE);
+      tokenView.setVisibility(View.VISIBLE);
+
       Thread t = new Thread() {
 
         @Override
         public void run() {
           try {
             while (!isInterrupted()) {
-              Thread.sleep(1000);
               runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                   String totpToken = getTotpToken(secret);
                   totpTokenTextView.setText(totpToken);
-                  
+
                   long timeRemaining = getTotpTimeRemaining();
                   totpTokenTimerView.setText(String.valueOf(timeRemaining));
                 }
               });
+              Thread.sleep(1000);
             }
           } catch (InterruptedException e) {
           }
@@ -106,18 +112,17 @@ public class MainActivity extends Activity {
 
       t.start();
     } else {
-      usernameEditText.setVisibility(View.VISIBLE);
-      registerButton.setVisibility(View.VISIBLE);
-      totpTokenTextView.setVisibility(View.GONE);
-      totpTokenTimerView.setVisibility(View.GONE);
+      registerView.setVisibility(View.VISIBLE);
+      tokenView.setVisibility(View.GONE);
     }
   }
-  
+
   private String getTotpToken(String secret) {
     TotpClock totpClock = new TotpClock(this.getApplicationContext());
     OtpProvider otpProvider = new OtpProvider(null, totpClock);
     TotpCounter totpCounter = otpProvider.getTotpCounter();
-    long otp_state = totpCounter.getValueAtTime(Utilities.millisToSeconds(totpClock.currentTimeMillis()));
+    long otp_state =
+        totpCounter.getValueAtTime(Utilities.millisToSeconds(totpClock.currentTimeMillis()));
     String totpToken = "";
     try {
       totpToken = otpProvider.computePin(secret, otp_state);
@@ -127,14 +132,16 @@ public class MainActivity extends Activity {
     }
     return totpToken;
   }
-  
+
   // Returns time remaining in seconds
   private long getTotpTimeRemaining() {
     TotpClock totpClock = new TotpClock(this.getApplicationContext());
     OtpProvider otpProvider = new OtpProvider(null, totpClock);
     TotpCounter totpCounter = otpProvider.getTotpCounter();
-    long otp_state = totpCounter.getValueAtTime(Utilities.millisToSeconds(totpClock.currentTimeMillis()));
-    return totpCounter.getTimeStep() - Utilities.millisToSeconds(System.currentTimeMillis()) % totpCounter.getTimeStep();
+    long otp_state =
+        totpCounter.getValueAtTime(Utilities.millisToSeconds(totpClock.currentTimeMillis()));
+    return totpCounter.getTimeStep() - Utilities.millisToSeconds(System.currentTimeMillis())
+        % totpCounter.getTimeStep();
   }
 
   public void onRegisterClick(View v) throws ClientProtocolException, IOException {
@@ -150,5 +157,26 @@ public class MainActivity extends Activity {
       e.printStackTrace();
     }
     new AsyncHttpTask(this.getApplicationContext()).execute("registrationId", json.toString());
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater=getMenuInflater();
+    inflater.inflate(R.menu.menu, menu);
+    return super.onCreateOptionsMenu(menu);
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    // Change user clicked
+    SharedPreferences prefs = getSharedPreferences(Constants.EASYAUTH_PREFERENCES_KEY, Context.MODE_PRIVATE);
+    SharedPreferences.Editor editor=prefs.edit();
+    editor.putString(Constants.EASYAUTH_TOTP_SECRET_KEY, "");
+    editor.putString(Constants.EASYAUTH_USERNAME_KEY, "");
+    editor.commit();
+    
+    registerView.setVisibility(View.VISIBLE);
+    tokenView.setVisibility(View.INVISIBLE);
+    return super.onOptionsItemSelected(item);
   }
 }
